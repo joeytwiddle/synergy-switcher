@@ -88,10 +88,10 @@ OnEnterExec = "playerctl play"
 ```toml
 [actions]
 OnLeaveExec = """
-  echo "[{timestamp}] left to {to_name}" >> ~/synergy-events.log
+  bash -c 'echo "[{timestamp}] left to {to_name}" >> ~/synergy-events.log'
 """
 OnEnterExec = """
-  echo "[{timestamp}] entered from {from_name}" >> ~/synergy-events.log
+  bash -c 'echo "[{timestamp}] entered from {from_name}" >> ~/synergy-events.log'
 """
 ```
 
