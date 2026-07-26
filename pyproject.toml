@@ -1,0 +1,15 @@
+[project]
+name = "synergy-switcher"
+version = "0.1.0"
+description = "Detects Synergy screen focus changes and fires configurable actions"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+synergy-switcher = "synergy_switcher.core:main"
