@@ -307,6 +307,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--version", action="version", version=f"synergy-switcher {VERSION}")
     p.add_argument("--dry-run", action="store_true", help="Log what would be run without executing")
     p.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
+    p.add_argument("--watch", "-w", action="store_true",
+                   help="Watch config file for changes and hot-reload")
     return p.parse_args(argv)
 
 def main():
@@ -332,10 +334,31 @@ def main():
     if args.dry_run:
         log.info("dry-run mode enabled, no commands will execute")
 
+    config_mtime = CONFIG_FILE.stat().st_mtime if CONFIG_FILE.exists() else 0
     last_role_check = 0.0
 
     while _should_run:
         now = time.monotonic()
+
+        if args.watch:
+            try:
+                new_mtime = CONFIG_FILE.stat().st_mtime
+                if new_mtime != config_mtime:
+                    log.info("config changed, reloading")
+                    cfg = Config.load()
+                    config_mtime = new_mtime
+                    watcher = LogWatcher(cfg.log_path, local_screen)
+                    watcher.seek_to_end()
+                    log.info("reloaded config")
+                    for name in ("OnEnterExec", "OnLeaveExec",
+                                  "OnEnterHostExec", "OnLeaveHostExec",
+                                  "OnEnterRemoteExec", "OnLeaveRemoteExec",
+                                  "OnRoleChangeExec"):
+                        cmds = getattr(cfg, name, ActionConfig()).commands
+                        if cmds:
+                            log.info("  %s: %s", name, cmds if len(cmds) > 1 else cmds[0])
+            except OSError:
+                pass
 
         events = watcher.read_new_events()
         for event in events:
