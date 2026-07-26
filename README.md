@@ -107,3 +107,5 @@ The action system uses `register_action_handler()` — adding new action types (
 
 - Python ≥ 3.11 (stdlib `tomllib` added in 3.11)
 - Synergy 3 (log at `~/.local/state/Synergy/synergy.log`)
+
+Writted with the help of OpenCode.
