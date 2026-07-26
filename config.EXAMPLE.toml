@@ -1,0 +1,39 @@
+# synergy-switcher configuration
+
+# Copy this file to ~/.config/synergy-switcher/config.toml and then edit it
+
+# Path to the Synergy log file (default: ~/.local/state/Synergy/synergy.log)
+#log_path = "~/.local/state/Synergy/synergy.log"
+
+# How often to poll the log file in seconds (default: 0.5)
+#poll_interval = 0.5
+
+# How often to check for host/remote role changes in seconds (default: 5.0)
+#role_check_interval = 5.0
+
+# Friendly names for synergy screen IDs (optional)
+[screens]
+"linux-1234abcd" = "Linux Desktop"
+"macbook-ffff8888" = "MacBook"
+
+[actions]
+
+# Single command — just a string
+OnEnterExec = "notify-send 'Synergy' 'Focus entered {to_name}'"
+
+# Multiple commands — use an array
+OnLeaveExec = [
+    "notify-send 'Synergy' 'Focus left to {to_name}'",
+    "playerctl pause",
+]
+
+# Runs when entering or leaving, but only if this device is currently the Synergy Host
+#OnEnterHostExec = "..."
+#OnLeaveHostExec = "..."
+
+# Runs when entering or leaving, but only if this device is currently a Synergy Remote
+#OnEnterRemoteExec = "..."
+#OnLeaveRemoteExec = "..."
+
+# Runs when this device switches between Host and Remote roles
+OnRoleChangeExec = "notify-send 'Synergy' 'Role changed: {from} -> {to}'"

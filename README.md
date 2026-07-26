@@ -33,34 +33,13 @@ python src/synergy_switcher/core.py
 
 ## Configuration
 
-Place a TOML file at `~/.config/synergy-switcher/config.toml`:
+Copy the example config and edit it:
 
-```toml
-# Friendly names for synergy screen IDs (optional)
-[screens]
-"tortillalinux-ffc082e5" = "Linux Desktop"
-"silvermacbook-523445cf" = "MacBook"
-
-[actions]
-
-# Single command — just a string
-OnEnterExec = "notify-send 'Synergy' 'Focus entered {to_name}'"
-
-# Multiple commands — use an array
-OnLeaveExec = [
-    "notify-send 'Synergy' 'Focus left to {to_name}'",
-    "playerctl pause",
-]
-
-# Runs when leaving, but only if this device is currently the Synergy Host
-OnLeaveHostExec = "systemctl --user start synergy-autohide"
-
-# Runs when entering, but only if this device is currently a Synergy Remote
-OnEnterRemoteExec = "systemctl --user stop synergy-autohide"
-
-# Runs when this device switches between Host and Remote roles
-OnRoleChangeExec = "notify-send 'Synergy' 'Role changed to {to}'"
+```bash
+cp config.EXAMPLE.toml ~/.config/synergy-switcher/config.toml
 ```
+
+Then edit `~/.config/synergy-switcher/config.toml` to match your screens and desired actions. See [config.EXAMPLE.toml](config.EXAMPLE.toml) for all available options.
 
 ### Template variables
 
