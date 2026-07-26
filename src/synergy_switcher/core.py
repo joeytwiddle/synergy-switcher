@@ -42,13 +42,21 @@ class Event:
 
 @dataclass
 class ActionConfig:
-    command: Optional[str] = None
+    commands: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, d) -> "ActionConfig":
         if isinstance(d, str):
-            return cls(command=d)
-        return cls(command=d.get("command") if isinstance(d, dict) else None)
+            return cls(commands=[d])
+        if isinstance(d, list):
+            return cls(commands=[str(cmd) for cmd in d])
+        if isinstance(d, dict):
+            raw = d.get("command", d.get("commands", ""))
+            if isinstance(raw, str):
+                return cls(commands=[raw])
+            if isinstance(raw, list):
+                return cls(commands=[str(cmd) for cmd in raw])
+        return cls()
 
 @dataclass
 class Config:
@@ -222,12 +230,11 @@ def register_action_handler(action_type: str, handler: callable):
     ACTION_HANDLERS[action_type] = handler
 
 def _try_run(action_cfg: ActionConfig, event: Event, cfg: Config, dry_run: bool):
-    if not action_cfg.command:
-        return
-    if dry_run:
-        log.info("[DRY-RUN] would run: %s", action_cfg.command)
-    else:
-        _run_command(action_cfg.command, event, cfg)
+    for cmd in action_cfg.commands:
+        if dry_run:
+            log.info("[DRY-RUN] would run: %s", cmd)
+        else:
+            _run_command(cmd, event, cfg)
 
 def run_actions(event: Event, cfg: Config, current_role: str, dry_run: bool = False):
     action_map = {
@@ -278,16 +285,11 @@ def print_startup_banner(cfg: Config, role: str, local: Optional[str]):
     log.info("  role: %s", role)
     log.info("  local screen: %s", local)
     log.info("  watching: %s", cfg.log_path)
-    if cfg.OnEnterExec.command:
-        log.info("  OnEnterExec: %s", cfg.OnEnterExec.command)
-    if cfg.OnLeaveExec.command:
-        log.info("  OnLeaveExec: %s", cfg.OnLeaveExec.command)
-    if cfg.OnLeaveHostExec.command:
-        log.info("  OnLeaveHostExec: %s", cfg.OnLeaveHostExec.command)
-    if cfg.OnEnterRemoteExec.command:
-        log.info("  OnEnterRemoteExec: %s", cfg.OnEnterRemoteExec.command)
-    if cfg.OnRoleChangeExec.command:
-        log.info("  OnRoleChangeExec: %s", cfg.OnRoleChangeExec.command)
+    for name in ("OnEnterExec", "OnLeaveExec", "OnLeaveHostExec",
+                  "OnEnterRemoteExec", "OnRoleChangeExec"):
+        cmds = getattr(cfg, name, ActionConfig()).commands
+        if cmds:
+            log.info("  %s: %s", name, cmds if len(cmds) > 1 else cmds[0])
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="synergy-switcher")

@@ -43,11 +43,14 @@ Place a TOML file at `~/.config/synergy-switcher/config.toml`:
 
 [actions]
 
-# Runs when mouse/focus enters this device
+# Single command — just a string
 OnEnterExec = "notify-send 'Synergy' 'Focus entered {to_name}'"
 
-# Runs when mouse/focus leaves this device
-OnLeaveExec = "notify-send 'Synergy' 'Focus left to {to_name}'"
+# Multiple commands — use an array
+OnLeaveExec = [
+    "notify-send 'Synergy' 'Focus left to {to_name}'",
+    "playerctl pause",
+]
 
 # Runs when leaving, but only if this device is currently the Synergy Host
 OnLeaveHostExec = "systemctl --user start synergy-autohide"
