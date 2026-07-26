@@ -65,8 +65,10 @@ class Config:
     role_check_interval: float = 5.0
     OnEnterExec: ActionConfig = field(default_factory=ActionConfig)
     OnLeaveExec: ActionConfig = field(default_factory=ActionConfig)
+    OnEnterHostExec: ActionConfig = field(default_factory=ActionConfig)
     OnLeaveHostExec: ActionConfig = field(default_factory=ActionConfig)
     OnEnterRemoteExec: ActionConfig = field(default_factory=ActionConfig)
+    OnLeaveRemoteExec: ActionConfig = field(default_factory=ActionConfig)
     OnRoleChangeExec: ActionConfig = field(default_factory=ActionConfig)
     screens: dict[str, str] = field(default_factory=dict)
 
@@ -95,8 +97,10 @@ class Config:
             cfg.screens = data["screens"]
 
         actions = data.get("actions", {})
-        for key in ("OnEnterExec", "OnLeaveExec", "OnLeaveHostExec",
-                     "OnEnterRemoteExec", "OnRoleChangeExec"):
+        for key in ("OnEnterExec", "OnLeaveExec",
+                     "OnEnterHostExec", "OnLeaveHostExec",
+                     "OnEnterRemoteExec", "OnLeaveRemoteExec",
+                     "OnRoleChangeExec"):
             if key in actions:
                 setattr(cfg, key, ActionConfig.from_dict(actions[key]))
 
@@ -246,11 +250,16 @@ def run_actions(event: Event, cfg: Config, current_role: str, dry_run: bool = Fa
     if action_cfg is not None:
         _try_run(action_cfg, event, cfg, dry_run)
 
-    if event.kind == "left" and current_role == "host":
-        _try_run(cfg.OnLeaveHostExec, event, cfg, dry_run)
-
-    if event.kind == "entered" and current_role == "remote":
-        _try_run(cfg.OnEnterRemoteExec, event, cfg, dry_run)
+    if current_role == "host":
+        if event.kind == "entered":
+            _try_run(cfg.OnEnterHostExec, event, cfg, dry_run)
+        elif event.kind == "left":
+            _try_run(cfg.OnLeaveHostExec, event, cfg, dry_run)
+    elif current_role == "remote":
+        if event.kind == "entered":
+            _try_run(cfg.OnEnterRemoteExec, event, cfg, dry_run)
+        elif event.kind == "left":
+            _try_run(cfg.OnLeaveRemoteExec, event, cfg, dry_run)
 
 def _run_command(template: str, event: Event, cfg: Config):
     screen_map = cfg.screens or {}
@@ -285,8 +294,10 @@ def print_startup_banner(cfg: Config, role: str, local: Optional[str]):
     log.info("  role: %s", role)
     log.info("  local screen: %s", local)
     log.info("  watching: %s", cfg.log_path)
-    for name in ("OnEnterExec", "OnLeaveExec", "OnLeaveHostExec",
-                  "OnEnterRemoteExec", "OnRoleChangeExec"):
+    for name in ("OnEnterExec", "OnLeaveExec",
+                  "OnEnterHostExec", "OnLeaveHostExec",
+                  "OnEnterRemoteExec", "OnLeaveRemoteExec",
+                  "OnRoleChangeExec"):
         cmds = getattr(cfg, name, ActionConfig()).commands
         if cmds:
             log.info("  %s: %s", name, cmds if len(cmds) > 1 else cmds[0])
