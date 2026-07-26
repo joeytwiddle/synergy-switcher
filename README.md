@@ -12,7 +12,7 @@ Tails the Synergy 3 log file (`~/.local/state/Synergy/synergy.log`) and parses s
 
 ```bash
 pipx install /path/to/synergy-switcher
-synergy-switcher
+synergy-switcher --verbose
 ```
 
 ### Option 2: pip in a venv
