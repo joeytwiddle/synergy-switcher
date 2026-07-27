@@ -36,7 +36,9 @@ python src/synergy_switcher/core.py
 Copy the example config and edit it:
 
 ```bash
-cp config.EXAMPLE.toml ~/.config/synergy-switcher/config.toml
+mkdir -p ~/.config/synergy-switcher
+
+cp -ai config.EXAMPLE.toml ~/.config/synergy-switcher/config.toml
 ```
 
 Then edit `~/.config/synergy-switcher/config.toml` to match your screens and desired actions. See [config.EXAMPLE.toml](config.EXAMPLE.toml) for all available options.
