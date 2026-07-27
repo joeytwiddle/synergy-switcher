@@ -80,6 +80,7 @@ class Config:
             log.info("no config at %s, using defaults", CONFIG_FILE)
             return cfg
 
+        log.info("loading config from %s", CONFIG_FILE)
         raw = CONFIG_FILE.read_bytes()
         try:
             data = tomllib.loads(raw.decode())
@@ -274,6 +275,7 @@ def _run_command(template: str, event: Event, cfg: Config):
     }
     try:
         cmd_str = template.format(**ctx)
+        log.info("running: %s", cmd_str)
         subprocess.Popen(shlex.split(cmd_str), start_new_session=True)
     except Exception as e:
         log.error("failed to run command: %s", e)
@@ -290,7 +292,6 @@ def _signal_handler(signum, frame):
     log.info("shutting down...")
 
 def print_startup_banner(cfg: Config, role: str, local: Optional[str]):
-    log.info("synergy-switcher v%s starting", VERSION)
     log.info("  role: %s", role)
     log.info("  local screen: %s", local)
     log.info("  watching: %s", cfg.log_path)
@@ -320,6 +321,8 @@ def main():
         datefmt="%H:%M:%S",
     )
 
+    log.info("synergy-switcher v%s starting", VERSION)
+
     signal.signal(signal.SIGINT, _signal_handler)
     signal.signal(signal.SIGTERM, _signal_handler)
 
@@ -344,6 +347,7 @@ def main():
             try:
                 new_mtime = CONFIG_FILE.stat().st_mtime
                 if new_mtime != config_mtime:
+                    log.info("------------------------------------------------------------")
                     log.info("config changed, reloading")
                     cfg = Config.load()
                     config_mtime = new_mtime
