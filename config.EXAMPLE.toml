@@ -27,13 +27,17 @@ OnLeaveExec = [
     "playerctl pause",
 ]
 
-# Runs when entering or leaving, but only if this device is currently the Synergy Host
-#OnEnterHostExec = "..."
-#OnLeaveHostExec = "..."
+# Note that multiple commands run in parallel
+# To run multiple commands in sequence, use:
+# OnLeaveExec = "bash -c 'command1 ; command2'",
 
-# Runs when entering or leaving, but only if this device is currently a Synergy Remote
-#OnEnterRemoteExec = "..."
-#OnLeaveRemoteExec = "..."
+# Commands to run when entering or leaving, but only if this device is currently the Synergy Host (Primary)
+#OnEnterHostExec   = "xset r rate 250 50"
+#OnLeaveHostExec   = "xset r rate 250 50"
 
-# Runs when this device switches between Host and Remote roles
+# Commands to run when entering or leaving, but only if this device is currently a Synergy Remote
+#OnEnterRemoteExec = "xset r rate 1500 50"
+#OnLeaveRemoteExec = "xset r rate 250 50"
+
+# Runs when this device switches between Host (Primary) and Remote roles
 OnRoleChangeExec = "notify-send 'Synergy' 'Role changed: {from} -> {to}'"
